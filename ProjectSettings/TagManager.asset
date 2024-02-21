@@ -1,0 +1,63 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Ground
+  - Checkpoint
+  - fireball
+  - SmallEnemy
+  - Sword
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - Ground
+  - Wall
+  - enemy
+  - player
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Foreground
+    uniqueID: 4018791013
+    locked: 0
+  - name: Background
+    uniqueID: 1704752121
+    locked: 0
+  - name: Player
+    uniqueID: 1383778585
+    locked: 0
+  - name: Ground
+    uniqueID: 649022885
+    locked: 0
+  - name: Sky
+    uniqueID: 4004085225
+    locked: 0
