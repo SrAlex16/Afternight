@@ -224,7 +224,6 @@ StyleCopReport.xml
 *_p.c
 *_h.h
 *.ilk
-*.meta
 *.obj
 *.iobj
 *.pch
@@ -348,7 +347,10 @@ PublishScripts/
 # NuGet Symbol Packages
 *.snupkg
 # The packages folder can be ignored because of Package Restore
-**/[Pp]ackages/*
+# NOTE: this must NOT match the Unity "Packages/" folder (manifest.json etc.), so it's
+# scoped to nested vendor "packages" dirs used by .NET tooling instead of the project root.
+**/bin/[Pp]ackages/*
+**/obj/[Pp]ackages/*
 # except build/, which is used as an MSBuild target.
 !**/[Pp]ackages/build/
 # Uncomment if necessary however generally it will be regenerated when needed

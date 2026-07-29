@@ -1,50 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 
 public class PauseMenu : MonoBehaviour
 {
-    public static bool GameIsPaused = false;
-    public GameObject pauseMenuUI;
-    
-    [Header("Sound params")]
-    public AudioSource audioSource;
-    public AudioClip menuClip;
+    public static bool GameIsPaused { get; private set; }
 
-    void Update()
+    [SerializeField] private GameObject pauseMenuUI;
+    [SerializeField] private KeyCode pauseKey = KeyCode.Escape;
+
+    [Header("Sound params")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip menuClip;
+
+    private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            audioSource.PlayOneShot(menuClip);
-            
-            if (GameIsPaused)
-            {
-                Resume();
-            }
-            else
-            {
-                Pause();
-            }
-        }
+        if (!Input.GetKeyDown(pauseKey)) return;
+
+        PlaySafe();
+        if (GameIsPaused) Resume();
+        else Pause();
     }
 
     public void Resume()
     {
-        pauseMenuUI.SetActive(false);
+        if (pauseMenuUI != null) pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
         GameIsPaused = false;
     }
 
     public void Pause()
     {
-        pauseMenuUI.SetActive(true);
+        if (pauseMenuUI != null) pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
         GameIsPaused = true;
     }
 
-    public void CloseApp()
+    public void CloseApp() => Application.Quit();
+
+    private void PlaySafe()
     {
-        Application.Quit();
+        if (audioSource != null && menuClip != null) audioSource.PlayOneShot(menuClip);
     }
 }

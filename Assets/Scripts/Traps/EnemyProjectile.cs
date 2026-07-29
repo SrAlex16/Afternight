@@ -1,38 +1,54 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemyProjectile : MonoBehaviour
+public class EnemyProjectile : MonoBehaviour, IPoolable
 {
-    [SerializeField] private float speed;
-    [SerializeField] private float resetTime;
-    [SerializeField] private float damage;
+    [SerializeField] private float speed = 8f;
+    [SerializeField] private float resetTime = 3f;
+    [SerializeField] private float damage = 1f;
+    [SerializeField] private string targetTag = "Player";
+
     private float lifeTime;
+    private ObjectPool<EnemyProjectile> pool;
 
-    public void ActiveProjectile()
-    {
-        lifeTime = 0;
-        gameObject.SetActive(true);
-    }
+    public void SetPool(ObjectPool<EnemyProjectile> owningPool) => pool = owningPool;
 
-    public void Update()
+    public void OnSpawned() => lifeTime = 0f;
+    public void OnDespawned() { }
+
+    private void Update()
     {
-        float movementSpeed = speed * Time.deltaTime;
-        transform.Translate(movementSpeed, 0, 0);
+        transform.Translate(speed * Time.deltaTime, 0f, 0f);
 
         lifeTime += Time.deltaTime;
         if (lifeTime > resetTime)
         {
-            gameObject.SetActive(false);
+            ReturnToPool();
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Player")
+        if (collision.CompareTag(targetTag))
         {
-            collision.GetComponent<PlayerStats>().TakeDamage(damage);
+            var damageable = collision.GetComponent<IDamageable>();
+            if (damageable != null)
+            {
+                damageable.TakeDamage(damage);
+            }
+            else
+            {
+                GameLogger.Warning(GameLogger.Category.Trap, $"{name}: '{collision.name}' no implementa IDamageable.", this);
+            }
         }
+
+        ReturnToPool();
+    }
+
+    private void ReturnToPool()
+    {
+        if (pool != null)
+            pool.Release(this);
+        else
+            gameObject.SetActive(false);
     }
 }

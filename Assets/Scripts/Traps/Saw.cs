@@ -1,13 +1,12 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Saw : MonoBehaviour
 {
-    [SerializeField] private float dmg;
-    [SerializeField] private float speed;
-    [SerializeField] private float movementDistance;
+    [SerializeField] private float damage = 1f;
+    [SerializeField] private float speed = 2f;
+    [SerializeField] private float movementDistance = 3f;
+    [SerializeField] private string targetTag = "Player";
+
     private bool movingLeft;
     private float leftEdge;
     private float rightEdge;
@@ -20,37 +19,30 @@ public class Saw : MonoBehaviour
 
     private void Update()
     {
-        if (movingLeft)
+        float limit = movingLeft ? leftEdge : rightEdge;
+        float direction = movingLeft ? -1f : 1f;
+
+        if ((movingLeft && transform.position.x > limit) || (!movingLeft && transform.position.x < limit))
         {
-            if (transform.position.x > leftEdge)
-            {
-                transform.position = new Vector3(transform.position.x - speed * Time.deltaTime, transform.position.y,
-                    transform.position.z);
-            }
-            else
-            {
-                movingLeft = false;
-            }
+            transform.position += new Vector3(direction * speed * Time.deltaTime, 0f, 0f);
         }
         else
         {
-            if (transform.position.x < rightEdge)
-            {
-                transform.position = new Vector3(transform.position.x + speed * Time.deltaTime, transform.position.y, transform.position.z);
-            }
-            else
-            {
-                movingLeft = true;
-            }
+            movingLeft = !movingLeft;
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Player")
-        {
-            collision.GetComponent<PlayerStats>().TakeDamage(dmg);
-        }
-    }
+        if (!collision.CompareTag(targetTag)) return;
 
+        var damageable = collision.GetComponent<IDamageable>();
+        if (damageable == null)
+        {
+            GameLogger.Warning(GameLogger.Category.Trap, $"{name}: '{collision.name}' no implementa IDamageable.", this);
+            return;
+        }
+
+        damageable.TakeDamage(damage);
+    }
 }

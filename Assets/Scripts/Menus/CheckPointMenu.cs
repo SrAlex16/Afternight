@@ -1,50 +1,40 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.IO.LowLevel.Unsafe;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class CheckPointMenu : MonoBehaviour
 {
-    public GameObject checkPointMenuUI;
-    [SerializeField] private String sceneName;
-    
-    [Header("Sound params")]
-    public AudioSource audioSource;
-    public AudioClip menuClip;
+    [SerializeField] private GameObject checkPointMenuUI;
+    [SerializeField] private string sceneName;
+    [SerializeField] private string targetTag = "Player";
 
-    private void OnTriggerEnter2D(Collider2D col)
+    [Header("Sound params")]
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip menuClip;
+
+    private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (col.tag == "Player")
-        {
-            audioSource.PlayOneShot(menuClip);
-            Pause();
-        }
+        if (!collision.CompareTag(targetTag)) return;
+
+        if (audioSource != null && menuClip != null) audioSource.PlayOneShot(menuClip);
+        Pause();
     }
 
     public void Pause()
     {
-        checkPointMenuUI.SetActive(true);
+        if (checkPointMenuUI != null) checkPointMenuUI.SetActive(true);
         Time.timeScale = 0f;
     }
-    
+
     public void NextLevel()
     {
+        if (string.IsNullOrEmpty(sceneName))
+        {
+            GameLogger.Error(GameLogger.Category.UI, $"{name}: sceneName vacío, no se puede cargar el siguiente nivel.", this);
+            return;
+        }
+        Time.timeScale = 1f;
         SceneManager.LoadScene(sceneName);
     }
-    
-    /*
-    public void Resume()
-    {
-        checkPointMenuUI.SetActive(false);
-        Time.timeScale = 1f;
-        GameIsPaused = false;
-    }
-    */
-    
-    public void CloseApp()
-    {
-        Application.Quit();
-    }
+
+    public void CloseApp() => Application.Quit();
 }

@@ -1,55 +1,65 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class FireTrap : MonoBehaviour
 {
-    [SerializeField] private float activationDelay;
-    [SerializeField] private float activeTime;
-    [SerializeField] private float damage;
+    [SerializeField] private float activationDelay = 0.5f;
+    [SerializeField] private float activeTime = 1f;
+    [SerializeField] private float damage = 1f;
+    [SerializeField] private string targetTag = "Player";
+    [SerializeField] private Color warningColor = Color.red;
+
     private Animator animator;
     private SpriteRenderer spriteRenderer;
-    private bool triggered; //cuando el trigger de la trampa se activa
-    private bool active; //cuando la trampa está activa y puede dañar al player
+    private Color originalColor;
+    private bool triggered;
+    private bool active;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null) originalColor = spriteRenderer.color;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Player")
-        {
-            if (!triggered)
-            {
-                StartCoroutine(ActivateFiretrap());
-            }
+        if (!collision.CompareTag(targetTag)) return;
 
-            if (active)
+        if (!triggered)
+        {
+            StartCoroutine(ActivateFireTrap());
+        }
+
+        if (active)
+        {
+            var damageable = collision.GetComponent<IDamageable>();
+            if (damageable != null)
             {
-                collision.GetComponent<PlayerStats>().TakeDamage(damage);
+                damageable.TakeDamage(damage);
+            }
+            else
+            {
+                GameLogger.Warning(GameLogger.Category.Trap, $"{name}: '{collision.name}' no implementa IDamageable.", this);
             }
         }
     }
 
-    private IEnumerator ActivateFiretrap()
+    private IEnumerator ActivateFireTrap()
     {
-        //pinta de rojo el sprite para avisar al player y activa la trampa
         triggered = true;
-        spriteRenderer.color = Color.red;
-        
-        //espera al delay, activa la trampa y pone el color normal
+        if (spriteRenderer != null) spriteRenderer.color = warningColor;
+
         yield return new WaitForSeconds(activationDelay);
-        spriteRenderer.color = Color.white;
+
+        if (spriteRenderer != null) spriteRenderer.color = originalColor;
         active = true;
-        animator.SetBool("activated", true);
-        
-        //espera durante x segundos y resetea las variables
+        animator?.SetBool("activated", true);
+
         yield return new WaitForSeconds(activeTime);
+
         active = false;
         triggered = false;
+        animator?.SetBool("activated", false);
     }
 }
